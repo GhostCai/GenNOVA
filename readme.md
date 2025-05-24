@@ -1,3 +1,4 @@
+python3.10 + pytorch 2.6.0
 ```bash
 # 安装svc
 cd third_party/stable-virtual-camera
