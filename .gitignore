@@ -1,4 +1,6 @@
 /datasets
+/output
+/cache
 
 *.png
 *.jpg

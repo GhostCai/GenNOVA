@@ -275,11 +275,12 @@ def readCamerasFromTransforms(path, transformsfile, depths_folder, white_backgro
 def readNerfSyntheticInfo(path, white_background, depths, eval, extension=".png"):
 
     depths_folder=os.path.join(path, depths) if depths != "" else ""
-    print("Reading Training Transforms")
+    print("Reading Training Transforms",end="")
     train_cam_infos = readCamerasFromTransforms(path, "transforms_train.json", depths_folder, white_background, False, extension)
-    print("Reading Test Transforms")
+    print(f" {len(train_cam_infos)} cameras found")
+    print("Reading Test Transforms", end="")
     test_cam_infos = readCamerasFromTransforms(path, "transforms_test.json", depths_folder, white_background, True, extension)
-    
+    print(f" {len(test_cam_infos)} cameras found")
     if not eval:
         train_cam_infos.extend(test_cam_infos)
         test_cam_infos = []

@@ -1193,7 +1193,7 @@ def get_value_dict(
         camera_scale
         if torch.isclose(
             torch.norm(camera_dists[0]),
-            torch.zeros(1),
+            torch.zeros(1).to(camera_dists.device),
             atol=1e-5,
         ).any()
         else (camera_scale / torch.norm(camera_dists[0]))

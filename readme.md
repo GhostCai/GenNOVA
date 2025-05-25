@@ -1,5 +1,10 @@
 python3.10 + pytorch 2.6.0
+大概要20G的显存
 ```bash
+
+export HF_HOME=./cache
+export HF_ENDPOINT=https://hf-mirror.com
+
 # 安装svc
 cd third_party/stable-virtual-camera
 pip install .
