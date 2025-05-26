@@ -203,13 +203,16 @@ if __name__ == "__main__":
     IMAGE_FOLDER = args.images
     TEXT_FOLDER = args.text
     OUT_PATH = args.out
-
-    # Check that we can save the output before we do a lot of work
-    try:
-        open(OUT_PATH, "a").close()
-    except Exception as e:
-        print(f"Could not save transforms JSON to {OUT_PATH}: {e}")
-        sys.exit(1)
+    
+    if not os.path.exists(OUT_PATH):
+        #new
+        os.makedirs(OUT_PATH, exist_ok=True)
+    # # Check that we can save the output before we do a lot of work
+    # try:
+    #     open(OUT_PATH, "a").close()
+    # except Exception as e:
+    #     print(f"Could not save transforms JSON to {OUT_PATH}: {e}")
+    #     sys.exit(1)
 
     print(f"outputting to {OUT_PATH}...")
     cameras = {}
