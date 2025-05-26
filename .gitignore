@@ -7,3 +7,8 @@
 *.jpeg
 *.npy
 *.gif
+*.json
+*.ply
+
+**/cfg_args
+**/events.out.tfevents.*

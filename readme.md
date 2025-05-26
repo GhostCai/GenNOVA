@@ -29,7 +29,7 @@ sudo apt install colmap
 bash 00.colmap2nerf.sh
 ```
 
-#### PIL加速
+#### PIL加速（可选）
 ```bash
 pip uninstall pillow
 apt-get install libjpeg-dev
@@ -40,4 +40,5 @@ pip install pillow-simd
 
 #### baseline：原版3DGS
 ```bash
-cd third_party/gaussian-splatting
+python 03.train_original3dgs_4views.py
+```

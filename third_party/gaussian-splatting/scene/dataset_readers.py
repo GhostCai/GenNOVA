@@ -284,9 +284,9 @@ def readNerfSyntheticInfo(path, white_background, depths, eval, extension=".png"
     print("Reading Test Transforms", end="")
     test_cam_infos = readCamerasFromTransforms(path, "transforms_test.json", depths_folder, white_background, True, extension)
     print(f" {len(test_cam_infos)} cameras found")
-    if not eval:
-        train_cam_infos.extend(test_cam_infos)
-        test_cam_infos = []
+    # if not eval: # very strange
+    #     train_cam_infos.extend(test_cam_infos)
+    #     test_cam_infos = []
 
     nerf_normalization = getNerfppNorm(train_cam_infos)
 
