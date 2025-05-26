@@ -25,7 +25,7 @@ for dir in "$BASE_DIR"/*/ ; do
     # 执行转换命令
     echo "Processing: $dirname"
     python 00.colmap2nerf.py \
-        --images "$BASE_DIR/$dirname/images" \
+        --images "$BASE_DIR/$dirname/images_4" \
         --text "$BASE_DIR/$dirname/sparse/0" \
         --out "$OUTPUT_BASE_DIR/$dirname" \
         --n_train 4 \
