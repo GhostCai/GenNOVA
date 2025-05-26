@@ -1,5 +1,7 @@
 python3.10 + pytorch 2.6.0
 大概要20G的显存
+
+### 环境
 ```bash
 
 export HF_HOME=./cache
@@ -18,4 +20,11 @@ pip install .
 cd ../../../datasets/nerf
 wget http://cseweb.ucsd.edu/~viscomp/projects/LF/papers/ECCV20/nerf/nerf_example_data.zip
 unzip nerf_example_data.zip
+```
+
+### 数据集预处理
+```bash
+sudo apt update
+sudo apt install colmap
+bash 00.colmap2nerf.sh
 ```
