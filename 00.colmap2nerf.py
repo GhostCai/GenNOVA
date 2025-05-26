@@ -44,6 +44,8 @@ def parse_args():
     parser.add_argument("--vocab_path", default="", help="Vocabulary tree path.")
     parser.add_argument("--overwrite", action="store_true", help="Do not ask for confirmation for overwriting existing images and COLMAP data.")
     parser.add_argument("--mask_categories", nargs="*", type=str, default=[], help="Object categories that should be masked out from the training images. See `scripts/category2id.json` for supported categories.")
+    parser.add_argument("--n_train", type=int, default=0, help="Number of training images to select uniformly from all images.")
+    parser.add_argument("--softlink", action="store_true", help="Create soft links instead of copying images.")
     args = parser.parse_args()
     return args
 
@@ -434,9 +436,88 @@ if __name__ == "__main__":
     for f in out["frames"]:
         f["transform_matrix"] = f["transform_matrix"].tolist()
     print(nframes,"frames")
-    print(f"writing {OUT_PATH}")
-    with open(OUT_PATH, "w") as outfile:
-        json.dump(out, outfile, indent=2)
+    
+    # Handle train/test split if n_train is specified
+    if args.n_train > 0:
+        # Create output directory structure
+        output_dir = args.out
+        os.makedirs(output_dir, exist_ok=True)
+        train_dir = os.path.join(output_dir, "train")
+        test_dir = os.path.join(output_dir, "test")
+        os.makedirs(train_dir, exist_ok=True)
+        os.makedirs(test_dir, exist_ok=True)
+        
+        # Select training frames uniformly
+        total_frames = len(out["frames"])
+        if args.n_train >= total_frames:
+            train_indices = list(range(total_frames))
+            test_indices = []
+        else:
+            # Select uniformly spaced indices
+            step = total_frames / args.n_train
+            train_indices = [int(i * step) for i in range(args.n_train)]
+            test_indices = [i for i in range(total_frames) if i not in train_indices]
+        
+        # Create train and test frame lists
+        train_frames = []
+        test_frames = []
+        
+        for i, frame in enumerate(out["frames"]):
+            original_path = frame["file_path"]
+            filename = os.path.basename(original_path)
+            
+            if i in train_indices:
+                # Training image
+                if args.softlink:
+                    new_path = os.path.join(train_dir, filename)
+                    abs_original = os.path.abspath(original_path)
+                    if os.path.exists(new_path):
+                        os.remove(new_path)
+                    os.symlink(abs_original, new_path)
+                else:
+                    new_path = os.path.join(train_dir, filename)
+                    shutil.copy2(original_path, new_path)
+                
+                new_frame = frame.copy()
+                new_frame["file_path"] = f"./train/{filename}"
+                train_frames.append(new_frame)
+            else:
+                # Test image
+                if args.softlink:
+                    new_path = os.path.join(test_dir, filename)
+                    abs_original = os.path.abspath(original_path)
+                    if os.path.exists(new_path):
+                        os.remove(new_path)
+                    os.symlink(abs_original, new_path)
+                else:
+                    new_path = os.path.join(test_dir, filename)
+                    shutil.copy2(original_path, new_path)
+                
+                new_frame = frame.copy()
+                new_frame["file_path"] = f"./test/{filename}"
+                test_frames.append(new_frame)
+        
+        # Create train transforms
+        train_out = out.copy()
+        train_out["frames"] = train_frames
+        train_json_path = os.path.join(output_dir, "transforms_train.json")
+        with open(train_json_path, "w") as outfile:
+            json.dump(train_out, outfile, indent=2)
+        print(f"writing {train_json_path} with {len(train_frames)} training frames")
+        
+        # Create test transforms
+        test_out = out.copy()
+        test_out["frames"] = test_frames
+        test_json_path = os.path.join(output_dir, "transforms_test.json")
+        with open(test_json_path, "w") as outfile:
+            json.dump(test_out, outfile, indent=2)
+        print(f"writing {test_json_path} with {len(test_frames)} test frames")
+        
+    else:
+        # Original behavior - single transforms.json
+        print(f"writing {OUT_PATH}")
+        with open(OUT_PATH, "w") as outfile:
+            json.dump(out, outfile, indent=2)
 
     if len(args.mask_categories) > 0:
         # Check if detectron2 is installed. If not, install it.
