@@ -28,3 +28,16 @@ sudo apt update
 sudo apt install colmap
 bash 00.colmap2nerf.sh
 ```
+
+#### PIL加速
+```bash
+pip uninstall pillow
+apt-get install libjpeg-dev
+apt-get install zlib1g-dev
+apt-get install libpng-dev
+pip install pillow-simd
+```
+
+#### baseline：原版3DGS
+```bash
+cd third_party/gaussian-splatting

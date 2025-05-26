@@ -17,7 +17,7 @@ for dir in "$BASE_DIR"/*/ ; do
     fi
     
     # 检查必要的输入文件是否存在
-    if [ ! -d "$BASE_DIR/$dirname/images" ] || [ ! -d "$BASE_DIR/$dirname/sparse/0" ]; then
+    if [ ! -d "$BASE_DIR/$dirname/images_4" ] || [ ! -d "$BASE_DIR/$dirname/sparse/0" ]; then
         echo "Skipping $dirname: missing images or sparse/0 directory"
         continue
     fi

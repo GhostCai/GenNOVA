@@ -22,7 +22,7 @@ from pathlib import Path
 from plyfile import PlyData, PlyElement
 from utils.sh_utils import SH2RGB
 from scene.gaussian_model import BasicPointCloud
-
+from tqdm import tqdm
 class CameraInfo(NamedTuple):
     uid: int
     R: np.array
@@ -235,7 +235,7 @@ def readCamerasFromTransforms(path, transformsfile, depths_folder, white_backgro
         fovx = contents["camera_angle_x"]
 
         frames = contents["frames"]
-        for idx, frame in enumerate(frames):
+        for idx, frame in enumerate(tqdm(frames)):
   
             cam_name = os.path.join(path, frame["file_path"] + extension)
             if not os.path.exists(cam_name):
