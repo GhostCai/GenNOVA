@@ -48,3 +48,4 @@ python 03.train_original3dgs_4views.py
 python 04.batch_intp_mipnerf360.py
 python 05.train_original3dgs_4views_intp5.py
 ```
+P.S. 初步试下来比较烂，可能不仅要interpolate还需要extrapolate
