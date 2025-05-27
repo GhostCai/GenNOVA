@@ -132,6 +132,15 @@ def nerf_to_opencv_pose(nerf_pose: np.ndarray) -> np.ndarray:
     opencv_pose[:, 1:3] *= -1  # 翻转y和z轴
     return opencv_pose
 
+def opencv_to_nerf_pose(opencv_pose: np.ndarray) -> np.ndarray:
+    """将OpenCV格式的pose转换为NeRF格式"""
+    # OpenCV使用右手坐标系 (x右, y下, z向前)
+    # NeRF使用右手坐标系 (x右, y上, z向后)
+    # 转换矩阵: [1,0,0; 0,-1,0; 0,0,-1]
+    nerf_pose = opencv_pose.copy()
+    nerf_pose[:, 1:3] *= -1  # 翻转y和z轴
+    return nerf_pose
+
 
 def interpolate_poses_with_metadata(poses: np.ndarray, img_names: List[str], num_interpolations: int) -> Tuple[np.ndarray, List[Dict]]:
     """在相邻poses之间插值生成新的poses，并记录插值元数据"""
@@ -456,7 +465,8 @@ def create_3dgs_dataset(
         
         # 转换pose回NeRF格式
         nerf_pose = pose.copy()
-        nerf_pose[:, 1:3] *= -1  # 从OpenCV转回NeRF格式
+        # nerf_pose[:, 1:3] *= -1  # 从OpenCV转回NeRF格式
+        # nerf_pose = opencv_to_nerf_pose(nerf_pose)
         
         # 添加到transforms
         frame_data = {

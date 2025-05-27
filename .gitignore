@@ -9,6 +9,7 @@
 *.gif
 *.json
 *.ply
+*.ckpt
 
 **/cfg_args
 **/events.out.tfevents.*
