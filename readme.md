@@ -42,3 +42,9 @@ pip install pillow-simd
 ```bash
 python 03.train_original3dgs_4views.py
 ```
+
+#### baseline：原版3DGS + SVC插5个值
+```bash
+python 04.batch_intp_mipnerf360.py
+python 05.train_original3dgs_4views_intp5.py
+```
