@@ -3,8 +3,11 @@ import subprocess
 import shutil
 
 # Define the base directories
-input_base = "datasets/mipnerf360_nerf"
-output_base = "datasets/mipnerf360_nerf_intp5"
+# input_base = "datasets/mipnerf360_nerf"
+# output_base = "datasets/mipnerf360_nerf_intp5"
+
+input_base = "datasets/nerf_sparse/"
+output_base = "datasets/nerf_sparse_intp5"
 
 # Get all scene directories
 scene_dirs = os.listdir(input_base)
@@ -33,7 +36,7 @@ for scene_name in scene_dirs:
     
     print(f"Processing scene: {scene_name}")
     try:
-        # subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True)
         
         # Post-processing
         print(f"Post-processing scene: {scene_name}")

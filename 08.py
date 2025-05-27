@@ -1,21 +1,12 @@
 import subprocess
 from pathlib import Path
 
-# # Scenes to process
-# scenes = ["bicycle","bonsai", "counter", "garden", "kitchen", "room", "stump"]
-
-# # Resolve paths to absolute
-# base_dataset_path = Path("datasets/mipnerf360_nerf_intp5").resolve()
-# base_model_path = Path("/input0/experiments/original3dgs_4views_intp5").resolve()
-
-
 # Scenes to process
 scenes = ["lego_sparse"]
 
 # Resolve paths to absolute
-base_dataset_path = Path("datasets/nerf_sparse_intp5").resolve()
-base_model_path = Path("/input0/experiments/original3dgs_nerf_sparse_intp5").resolve()
-
+base_dataset_path = Path("datasets/nerf/nerf_synthetic").resolve()
+base_model_path = Path("/input0/experiments/original3dgs_4views_fisherf").resolve()
 project_dir = Path("third_party/gaussian-splatting").resolve()
 
 #sanity check
@@ -35,7 +26,7 @@ for scene in scenes:
     print(f"Model Path:   {model_path}\n")
 
     commands = [
-        ["python", "train.py", "-s", str(dataset_path), "-m", str(model_path)],
+        ["python", "train-fisherf.py", "-s", str(dataset_path), "-m", str(model_path)],
         ["python", "render.py", "-m", str(model_path)],
         ["python", "metrics.py", "-m", str(model_path)]
     ]

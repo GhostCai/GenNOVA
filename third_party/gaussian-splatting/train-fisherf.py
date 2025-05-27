@@ -39,6 +39,41 @@ try:
     SPARSE_ADAM_AVAILABLE = True
 except:
     SPARSE_ADAM_AVAILABLE = False
+    
+def generate_new_viewpoint(existing_cams, distance=4.031, device="cuda"):
+    # 1. 随机生成上半球面方向
+    theta = np.random.uniform(0, 2*np.pi)  # 水平角 [0, 2π]
+    phi = np.random.uniform(0, np.pi/2)    # 俯仰角 [0, π/2]（上半球）
+    
+    # 2. 计算相机位置（球坐标转笛卡尔坐标）
+    x = distance * np.sin(phi) * np.cos(theta)
+    y = distance * np.sin(phi) * np.sin(theta)
+    z = distance * np.cos(phi)
+    T = np.array([x, y, z])
+    
+    # 3. 计算旋转矩阵（Z轴指向原点）
+    forward = -T / np.linalg.norm(T)
+    right = np.cross(np.array([0,1,0]), forward)
+    right /= np.linalg.norm(right)
+    up = np.cross(forward, right)
+    R = np.vstack([right, up, forward])  # 3x3旋转矩阵
+    
+    # 4. 避免与现有视角过于接近
+    for cam in existing_cams:
+        if np.arccos(np.dot(T, cam.T)/(distance**2)) < np.pi/6:  # 夹角<30度则重新生成
+            return generate_new_viewpoint(existing_cams, distance)
+    
+    # 5. 创建兼容的MiniCam对象
+    width, height = existing_cams[0].image_width, existing_cams[0].image_height
+    fovx, fovy = existing_cams[0].FoVx, existing_cams[0].FoVy
+    znear, zfar = existing_cams[0].znear, existing_cams[0].zfar
+    
+    world_view_transform = torch.tensor(getWorld2View2(R, T)).transpose(0, 1).to(device)
+    projection_matrix = getProjectionMatrix(znear=znear, zfar=zfar, fovX=fovx, fovY=fovy).transpose(0,1).to(device)
+    full_proj_transform = (world_view_transform.unsqueeze(0).bmm(projection_matrix.unsqueeze(0))).squeeze(0)
+    
+    return MiniCam(width, height, fovy, fovx, znear, zfar, 
+                  world_view_transform, full_proj_transform)
 
 def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoint_iterations, checkpoint, debug_from):
 
@@ -98,9 +133,19 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         if not viewpoint_stack:
             viewpoint_stack = scene.getTrainCameras().copy()
             viewpoint_indices = list(range(len(viewpoint_stack)))
+        
+        if iteration % 2000 == 0 and len(viewpoint_stack) < 20:  # 示例：最多20个视角
+            new_cam = generate_new_viewpoint(viewpoint_stack)
+            viewpoint_stack.append(new_cam)
+            viewpoint_indices.append(len(viewpoint_indices))  # 新索引
+            viewpoint_cam.original_image = generate_interpolated_views(...)
+        
         rand_idx = randint(0, len(viewpoint_indices) - 1)
         viewpoint_cam = viewpoint_stack.pop(rand_idx)
         vind = viewpoint_indices.pop(rand_idx)
+        # print(viewpoint_cam.R)
+        # print(viewpoint_cam.T)
+    
 
         # Render
         if (iteration - 1) == debug_from:
@@ -111,10 +156,9 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         render_pkg = render(viewpoint_cam, gaussians, pipe, bg, use_trained_exp=dataset.train_test_exp, separate_sh=SPARSE_ADAM_AVAILABLE)
         image, viewspace_point_tensor, visibility_filter, radii = render_pkg["render"], render_pkg["viewspace_points"], render_pkg["visibility_filter"], render_pkg["radii"]
 
-        # if viewpoint_cam.alpha_mask is not None:
-        #     #print(viewpoint_cam)
-        #     alpha_mask = viewpoint_cam.alpha_mask.cuda()
-        #     image *= alpha_mask
+        if viewpoint_cam.alpha_mask is not None:
+            alpha_mask = viewpoint_cam.alpha_mask.cuda()
+            image *= alpha_mask
 
         # Loss
         gt_image = viewpoint_cam.original_image.cuda()
