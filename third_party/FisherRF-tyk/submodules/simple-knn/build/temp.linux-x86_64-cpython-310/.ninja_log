@@ -1,0 +1,4 @@
+# ninja log v5
+1	10868	1748358108259337932	/input0/third_party/FisherRF/submodules/simple-knn/build/temp.linux-x86_64-cpython-310/simple_knn.o	9648525e549e6a9f
+1	14906	1748358112291404611	/input0/third_party/FisherRF/submodules/simple-knn/build/temp.linux-x86_64-cpython-310/ext.o	c4a156c214aea81a
+1	41028	1748358138407836503	/input0/third_party/FisherRF/submodules/simple-knn/build/temp.linux-x86_64-cpython-310/spatial.o	5944ae02e1aa5e88
