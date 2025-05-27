@@ -1,5 +1,6 @@
 import subprocess
 from pathlib import Path
+import argparse
 
 # # Scenes to process
 # scenes = ["bicycle","bonsai", "counter", "garden", "kitchen", "room", "stump"]
@@ -12,9 +13,17 @@ from pathlib import Path
 # Scenes to process
 scenes = ["lego_sparse"]
 
+# Parse command line arguments
+parser = argparse.ArgumentParser(description='Train 3DGS with specified paths')
+parser.add_argument('--dataset_path', type=str, default="datasets/nerf_sparse_intp5",
+                    help='Base dataset path')
+parser.add_argument('--model_path', type=str, default="/input0/experiments/original3dgs_nerf_sparse_intp5",
+                    help='Saved 3dgs model path')
+args = parser.parse_args()
+
 # Resolve paths to absolute
-base_dataset_path = Path("datasets/nerf_sparse_intp5").resolve()
-base_model_path = Path("/input0/experiments/original3dgs_nerf_sparse_intp5").resolve()
+base_dataset_path = Path(args.dataset_path).resolve()
+base_model_path = Path(args.model_path).resolve()
 
 project_dir = Path("third_party/gaussian-splatting").resolve()
 

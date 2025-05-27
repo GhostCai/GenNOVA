@@ -40,40 +40,65 @@ try:
 except:
     SPARSE_ADAM_AVAILABLE = False
     
-def generate_new_viewpoint(existing_cams, distance=4.031, device="cuda"):
-    # 1. 随机生成上半球面方向
-    theta = np.random.uniform(0, 2*np.pi)  # 水平角 [0, 2π]
-    phi = np.random.uniform(0, np.pi/2)    # 俯仰角 [0, π/2]（上半球）
+def generate_random_camera(reference_cam):
+    # Get the distance of the reference camera to the origin
+    ref_camera_center = reference_cam.camera_center.cpu().numpy()
+    distance = np.linalg.norm(ref_camera_center)
     
-    # 2. 计算相机位置（球坐标转笛卡尔坐标）
+    # Generate a random position on the upper hemisphere
+    # Using spherical coordinates
+    theta = np.random.uniform(0, 2*pi)   # Azimuthal angle (all around)
+    phi = np.random.uniform(0, pi/2)     # Elevation angle (upper hemisphere only)
+    
+    # Convert to Cartesian coordinates
     x = distance * np.sin(phi) * np.cos(theta)
     y = distance * np.sin(phi) * np.sin(theta)
     z = distance * np.cos(phi)
-    T = np.array([x, y, z])
     
-    # 3. 计算旋转矩阵（Z轴指向原点）
-    forward = -T / np.linalg.norm(T)
-    right = np.cross(np.array([0,1,0]), forward)
-    right /= np.linalg.norm(right)
+    new_camera_position = np.array([x, y, z])
+    
+    # Calculate rotation matrix so camera looks at the origin
+    # Forward direction (z) points from camera to origin
+    forward = -new_camera_position / np.linalg.norm(new_camera_position)
+    
+    # Find a vector orthogonal to forward to define the 'up' axis
+    # First choose a temporary vector not collinear with forward
+    temp = np.array([0.0, 1.0, 0.0]) if abs(forward[1]) < 0.9 else np.array([1.0, 0.0, 0.0])
+    
+    # 'Right' vector orthogonal to forward and temp
+    right = np.cross(temp, forward)
+    right = right / np.linalg.norm(right)
+    
+    # 'Up' vector orthogonal to forward and right
     up = np.cross(forward, right)
-    R = np.vstack([right, up, forward])  # 3x3旋转矩阵
     
-    # 4. 避免与现有视角过于接近
-    for cam in existing_cams:
-        if np.arccos(np.dot(T, cam.T)/(distance**2)) < np.pi/6:  # 夹角<30度则重新生成
-            return generate_new_viewpoint(existing_cams, distance)
+    # Build rotation matrix
+    R = np.stack([right, up, forward], axis=1)
     
-    # 5. 创建兼容的MiniCam对象
-    width, height = existing_cams[0].image_width, existing_cams[0].image_height
-    fovx, fovy = existing_cams[0].FoVx, existing_cams[0].FoVy
-    znear, zfar = existing_cams[0].znear, existing_cams[0].zfar
+    # Translation (T) is the negative camera position
+    T = -R.T @ new_camera_position
     
-    world_view_transform = torch.tensor(getWorld2View2(R, T)).transpose(0, 1).to(device)
-    projection_matrix = getProjectionMatrix(znear=znear, zfar=zfar, fovX=fovx, fovY=fovy).transpose(0,1).to(device)
-    full_proj_transform = (world_view_transform.unsqueeze(0).bmm(projection_matrix.unsqueeze(0))).squeeze(0)
+    # Create a new camera with the same parameters but different pose
+    # Use the reference camera's properties
+    new_cam = Camera(
+        resolution=(reference_cam.image_width, reference_cam.image_height),
+        colmap_id=-1,  # Special ID for synthetic camera
+        R=R,
+        T=T,
+        FoVx=reference_cam.FoVx,
+        FoVy=reference_cam.FoVy,
+        depth_params=None,  # No depth parameters for synthetic camera
+        image=reference_cam.original_image.cpu().permute(1, 2, 0).numpy(),  # Pass the same image for now
+        invdepthmap=None,  # No depth map for synthetic camera
+        image_name="synthetic_view",
+        uid=-1,  # Special UID for synthetic camera
+        data_device=reference_cam.data_device,
+        train_test_exp=False,
+        is_test_dataset=False,
+        is_test_view=False
+    )
     
-    return MiniCam(width, height, fovy, fovx, znear, zfar, 
-                  world_view_transform, full_proj_transform)
+    return new_cam
 
 def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoint_iterations, checkpoint, debug_from):
 
@@ -133,12 +158,14 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         if not viewpoint_stack:
             viewpoint_stack = scene.getTrainCameras().copy()
             viewpoint_indices = list(range(len(viewpoint_stack)))
+            
+        print(viewpoint_indices)
         
         if iteration % 2000 == 0 and len(viewpoint_stack) < 20:  # 示例：最多20个视角
-            new_cam = generate_new_viewpoint(viewpoint_stack)
-            viewpoint_stack.append(new_cam)
-            viewpoint_indices.append(len(viewpoint_indices))  # 新索引
-            viewpoint_cam.original_image = generate_interpolated_views(...)
+            reference_camera = viewpoint_stack[0]
+            new_camera = generate_random_camera(reference_camera)
+            viewpoint_stack.append(new_camera)
+            viewpoint_indices.append(-1)
         
         rand_idx = randint(0, len(viewpoint_indices) - 1)
         viewpoint_cam = viewpoint_stack.pop(rand_idx)
