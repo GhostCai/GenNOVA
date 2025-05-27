@@ -887,7 +887,7 @@ def main():
     parser = argparse.ArgumentParser(description="NeRF视角插值和外推工具")
     parser.add_argument("--json_path", type=str, required=True, help="NeRF synthetic格式的JSON文件路径")
     parser.add_argument("--output_dir", type=str, required=True, help="输出目录")
-    parser.add_argument("--num_interpolations", type=int, default=3, help="每两个相邻视角之间插值的数量")
+    parser.add_argument("--num_interpolations", type=int, default=0, help="每两个相邻视角之间插值的数量")
     parser.add_argument("--num_extrapolations", type=int, default=20, help="外推生成的视角数量")
     parser.add_argument("--extrapolation_strategies", type=str, nargs='+', 
                        default=['radial_expansion', 'height_variation', 'orbit_extension', 'random_perturbation', 'trajectory_extension'],
@@ -991,3 +991,18 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+"""
+1. 五种外推策略
+径向扩展 (radial_expansion): 基于现有相机位置向外扩展，增加距离多样性
+高度变化 (height_variation): 改变相机高度，探索不同的垂直视角
+轨道扩展 (orbit_extension): 创建新的环绕轨道，增加角度覆盖
+随机扰动 (random_perturbation): 在现有姿态基础上添加合理噪声
+轨迹延拓 (trajectory_extension): 基于现有轨迹趋势预测新位置
+2. 智能相机朝向
+使用 _look_at_rotation() 函数确保新相机始终朝向场景中心
+根据相机高度调整俯仰角
+3. 统计驱动的参数
+分析输入poses的统计特性（中心、距离、高度范围等）
+基于这些统计信息生成合理的外推参数
+"""
