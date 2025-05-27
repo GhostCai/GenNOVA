@@ -45,7 +45,7 @@ python 03.train_original3dgs_4views.py
 
 #### baseline：原版3DGS + SVC插5个值
 ```bash
-python 04.batch_intp_mipnerf360.py
-python 05.train_original3dgs_4views_intp5.py
+python 04.batch_intp_mipnerf360.py --interpolations 5
+python 05.train_original3dgs_4views_intp5.py --interpolations 5 --output_path experiments/original3dgs_nerf_sparse_intp5
 ```
 P.S. 初步试下来比较烂，可能不仅要interpolate还需要extrapolate
