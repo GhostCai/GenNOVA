@@ -464,6 +464,8 @@ if __name__ == "__main__":
         # Create train and test frame lists
         train_frames = []
         test_frames = []
+        # Sort frames by file_path to maintain sequence order
+        out["frames"] = sorted(out["frames"], key=lambda f: f["file_path"])
         
         for i, frame in enumerate(out["frames"]):
             original_path = frame["file_path"]
