@@ -2,6 +2,20 @@
 /output
 /cache
 
+/third_party/FisherRF-tyk/cache/hub
+/third_party/FisherRF-tyk/cache/assets
+/third_party/FisherRF-tyk/cache/wandb
+
+
+*.wandb
+*.log
+*.pyc
+*.html
+*.js
+*.css
+*.pkl
+*.pt
+*.pth
 *.png
 *.jpg
 *.jpeg
@@ -13,3 +27,5 @@
 
 **/cfg_args
 **/events.out.tfevents.*
+
+
