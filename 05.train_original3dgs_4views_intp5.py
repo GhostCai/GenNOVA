@@ -15,15 +15,16 @@ scenes = ["lego_sparse"]
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Train 3DGS with specified paths')
-parser.add_argument('--dataset_path', type=str, default="datasets/nerf_sparse_intp5",
-                    help='Base dataset path')
-parser.add_argument('--model_path', type=str, default="/input0/experiments/original3dgs_nerf_sparse_intp5",
+parser.add_argument('--interpolations', type=int, default="5",
+                    help='interpolations')
+parser.add_argument('--output_path', type=str, default="/input0/experiments/original3dgs_nerf_sparse_intp5",
                     help='Saved 3dgs model path')
 args = parser.parse_args()
 
+dataset_path = "datasets/nerf_sparse_intp" + str(args.interpolations)
 # Resolve paths to absolute
-base_dataset_path = Path(args.dataset_path).resolve()
-base_model_path = Path(args.model_path).resolve()
+base_dataset_path = Path(dataset_path).resolve()
+base_model_path = Path(args.output_path).resolve()
 
 project_dir = Path("third_party/gaussian-splatting").resolve()
 
