@@ -1,10 +1,21 @@
 import os
 import subprocess
 import shutil
+import argparse
 
 # Define the base directories
-input_base = "datasets/mipnerf360_nerf"
-output_base = "datasets/mipnerf360_nerf_in5_ex20"
+# input_base = "datasets/mipnerf360_nerf"
+# output_base = "datasets/mipnerf360_nerf_intp5"
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Process NeRF datasets with interpolation')
+parser.add_argument('-i', type=int, default=1,
+                    help='Number of interpolations (default: 5)')
+parser.add_argument('-e', type=int, default=20,
+                    help='Number of extrapolations (default: 20)')
+args = parser.parse_args()
+
+input_base = "datasets/nerf_sparse/"
+output_base = "datasets/nerf_sparse_mixed" + str(args.i)
 
 # Get all scene directories
 scene_dirs = os.listdir(input_base)
@@ -28,8 +39,8 @@ for scene_name in scene_dirs:
         "06.extrapolate_baseline.py",
         "--json_path", json_path,
         "--output_dir", output_dir,
-        "--num_interpolations", "5",
-        "--num_extrapolations", "20",
+        "--num_interpolations", str(args.i),
+        "--num_extrapolations", str(args.e)
     ]
     
     print(f"Processing scene: {scene_name}")

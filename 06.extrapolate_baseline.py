@@ -438,37 +438,39 @@ def create_3dgs_dataset(
         }
         transforms_data["frames"].append(frame_data)
     
-    # 处理插值图像
+    # 处理生成的图像（插值和外推）
     for i, (frame_path, pose, metadata) in enumerate(zip(interpolated_frame_paths, interpolated_poses, interpolation_metadata)):
-        # 生成有意义的文件名
-        alpha = metadata['alpha']
-        source1 = metadata['source_img1']
-        source2 = metadata['source_img2']
-        step = metadata['step']
+        # 根据metadata类型生成不同的文件名
+        strategy = metadata.get('strategy', 'interpolation')
         
-        # 创建插值图像名称
-        interp_name = f"int_{source1}_{source2}_{alpha:.3f}"
-        dst_path = osp.join(train_dir, f"{interp_name}.png")
+        if strategy == 'interpolation' or 'alpha' in metadata:
+            # 插值图像的处理
+            alpha = metadata['alpha']
+            source1 = metadata['source_img1']
+            source2 = metadata['source_img2']
+            step = metadata['step']
+            
+            # 创建插值图像名称
+            img_name = f"int_{source1}_{source2}_{alpha:.3f}"
+            
+        else:
+            # 外推图像的处理
+            img_name = f"ext_{strategy}_{i:04d}"
+            
+        dst_path = osp.join(train_dir, f"{img_name}.png")
         
-        # 复制插值图像
+        # 复制生成的图像
         import shutil
         shutil.copy2(frame_path, dst_path)
         
-        # 转换pose回NeRF格式
+        # 转换pose回NeRF格式（保持不变，因为我们的poses已经是正确的格式）
         nerf_pose = pose.copy()
-        nerf_pose[:, 1:3] *= -1  # 从OpenCV转回NeRF格式
         
         # 添加到transforms
         frame_data = {
-            "file_path": f"./train/{interp_name}",
+            "file_path": f"./train/{img_name}",
             "transform_matrix": nerf_pose.tolist(),
-            "interpolation_metadata": {
-                "source_img1": source1,
-                "source_img2": source2,
-                "alpha": alpha,
-                "step": step,
-                "total_steps": metadata['total_steps']
-            }
+            "generation_metadata": metadata  # 保存完整的生成元数据
         }
         transforms_data["frames"].append(frame_data)
     
@@ -479,7 +481,7 @@ def create_3dgs_dataset(
     
     print(f"Created 3DGS dataset with {len(transforms_data['frames'])} total frames")
     print(f"- Input images: {len(input_img_paths)}")
-    print(f"- Interpolated images: {len(interpolated_frame_paths)}")
+    print(f"- Generated images: {len(interpolated_frame_paths)}")
     print(f"- Dataset saved to: {output_dir}")
     print(f"- Images directory: {train_dir}")
     print(f"- Transforms file: {transforms_path}")
