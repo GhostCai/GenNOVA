@@ -5,7 +5,7 @@ print('''
  |  __  | |  | | | |  | |  | | |  | | | |_ |
  | |  | | |__| | | |  | |__| | |__| | |__| |
  |_|  |_|\____/  |_|  |_____/ \____/ \_____|
-                                                                                
+ (with pesudo GT saving)                                                                              
 ''')
 import os
 import torch
@@ -77,7 +77,7 @@ def PILtoTorch(pil_image):
 
 def generate(idxs):
     json_path = "/openbayes/input/input0/datasets/nerf/nerf_synthetic/hotdog/transforms_train-rgb.json"
-    output_dir = "/openbayes/input/input0/datasets/tmp-hotdog"
+    output_dir = f"/openbayes/input/input0/datasets/tmp-hotdog-{idxs}"
     
     img_paths, poses, camera_angle_x, img_names = parse_nerf_json_with_idxs(json_path, idxs[:4])
     _, interpolated_poses, _, _ = parse_nerf_json_with_idxs(json_path, idxs[-1:])
