@@ -1816,7 +1816,7 @@ def run_one_scene(
         prior_argsort = np.argsort(input_indices + prior_indices).tolist()
         prior_indices = np.array(input_indices + prior_indices)[prior_argsort].tolist()
         gt_input_inds = [prior_argsort.index(i) for i in range(input_c2ws.shape[0])]
-
+        #print(input_imgs.device)
         traj_prior_imgs = torch.cat(
             [input_imgs, get_k_from_dict(all_samples, "samples-rgb")], dim=0
         )[prior_argsort]

@@ -1,6 +1,10 @@
 /datasets
 /output
 /cache
+/experiments
+/final_experiments
+/final_experiments_clean
+
 
 /third_party/FisherRF-tyk/cache/hub
 /third_party/FisherRF-tyk/cache/assets
@@ -24,6 +28,7 @@
 *.json
 *.ply
 *.ckpt
+*.zip
 
 **/cfg_args
 **/events.out.tfevents.*

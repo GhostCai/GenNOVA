@@ -5,7 +5,7 @@ print('''
  |  __  | |  | | | |  | |  | | |  | | | |_ |
  | |  | | |__| | | |  | |__| | |__| | |__| |
  |_|  |_|\____/  |_|  |_____/ \____/ \_____|
- (with pesudo GT saving)                                                                              
+ (with pseudo GT saving)                                                                              
 ''')
 import os
 import torch
