@@ -68,7 +68,9 @@ python 03.train_original3dgs_4views.py
 
 ## Ours: Sparse View 3DGS + GenNOVA
 
-cd third_party/FisherRF/
+```
+cd third_party/FisherRF-tyk/
 python active_train-chair.py
 python active_train-lego.py
 python active_train-hotdog.py
+```
