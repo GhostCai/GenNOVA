@@ -9,7 +9,7 @@ This project implements sparse-view 3D Gaussian Splatting with GenNOVA-enhanced 
 
 ⸻
 
-##Environment Setup
+## Environment Setup
 
 ```
 export HF_HOME=./cache
@@ -21,14 +21,14 @@ cd third_party/stable-virtual-camera
 pip install .
 
 ## Install 3DGS custom operators
+
+```
 cd ../gaussian-splatting/submodules/diff-gaussian-rasterization
 pip install .
 
 cd ../simple-knn/
 pip install .
-
-
-⸻
+```
 
 ## Dataset Setup (NeRF-Synthetic)
 
