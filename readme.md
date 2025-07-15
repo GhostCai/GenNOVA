@@ -58,14 +58,13 @@ apt-get install libpng-dev
 pip install pillow-simd
 ```
 
-⸻
 
 ## Baseline: Original 3DGS (4 views)
 
+```
 python 03.train_original3dgs_4views.py
+```
 
-
-⸻
 
 ## Ours: Sparse View 3DGS + GenNOVA
 
